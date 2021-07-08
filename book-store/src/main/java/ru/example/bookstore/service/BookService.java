@@ -9,6 +9,7 @@ import ru.example.bookstore.repository.BookRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,11 +25,20 @@ public class BookService {
     }
 
     public List<Book> getBooks() {
-        Integer discount = discountService.getDiscount();
-
-        return bookRepository.findAll().stream().peek(book -> book.setPrice(book.getPrice().subtract(
-                book.getPrice().multiply(new BigDecimal(discount)).divide(new BigDecimal(100),
-                       RoundingMode.DOWN))))
+        return bookRepository.findAll().stream()
+                .peek(book -> book.setPrice(Math.round(book.getPrice() * (1 - discountService.getDiscount(book.getBookGroup().getId()) / 100.0) * 100) / 100.0))
                 .collect(Collectors.toList());
+    }
+
+    public Book getBookById(Long id) {
+        Optional<Book> optionalBook = bookRepository.findById(id);
+        Book book;
+        if (optionalBook.isPresent()) {
+            book = optionalBook.get();
+            book.setPrice(Math.round(book.getPrice() * (1 - discountService.getDiscount(book.getBookGroup().getId()) / 100.0) * 100) / 100.0);
+        } else {
+            book = null;
+        }
+        return book;
     }
 }

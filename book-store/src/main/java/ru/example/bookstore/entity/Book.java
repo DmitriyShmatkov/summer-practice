@@ -5,10 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Builder
@@ -22,5 +19,9 @@ public class Book {
     private Long id;
     private String author;
     private String title;
-    private BigDecimal price;
+    private double price;
+
+    @ManyToOne
+    @JoinColumn(name = "book_group_id")
+    private BookGroup bookGroup;
 }
